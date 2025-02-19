@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
 from sklearn.cluster import KMeans
-import pandas as pd
+import pandas as pd 
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import OneHotEncoder
 
@@ -81,8 +81,29 @@ Refutação: Acidentes graves são mais comuns em condições climáticas normai
 # Preparando os dados para o gráfico de barras empilhadas
 stacked_data = df.groupby(["wheather_condition", "victims_condition"]).size().unstack(fill_value=0)
 
-# Criando o gráfico de barras empilhadas
-stacked_data.plot(kind="bar", stacked=True, colormap="Accent")
+# Criando o gráfico
+fig, ax = plt.subplots(figsize=(8, 5))
+
+colormap = plt.get_cmap("Accent")
+colors = [colormap(i) for i in np.linspace(0, 1, len(stacked_data.columns))]
+
+
+# Padrões de textura para acessibilidade
+hatch_patterns = ["x","o"]
+
+# Desenhar barras empilhadas com cores e texturas
+bottom = np.zeros(len(stacked_data))
+for i, (col, color) in enumerate(zip(stacked_data.columns, colors)):
+    bars = ax.bar(
+        stacked_data.index,
+        stacked_data[col],
+        label=col,
+        bottom=bottom,
+        color=color,
+        hatch=hatch_patterns[i % len(hatch_patterns)],
+        edgecolor="black",  # Para melhor contraste
+    )
+    bottom += stacked_data[col].values
 
 # Personalizando o gráfico
 plt.title("Condição da Vítima por Condição Climática")
@@ -91,8 +112,9 @@ plt.ylabel("Contagem")
 plt.legend(title="Condição da Vítima")
 plt.xticks(rotation=0)
 
-fig = plt.tight_layout()
-st.pyplot(fig)
+# Exibir o gráfico
+plt.tight_layout()
+plt.show()
 
 st.markdown("""
 A hipótese é refutada.
